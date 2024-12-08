@@ -58,8 +58,6 @@ class Game:
         self.row = self.get_random_row()
         self.row2 = self.get_random_row(self.row)
         while not self.player.lost:
-            #self.row = self.get_random_row()
-            #self.row2 = self.get_random_row(self.row)
             self.display_choices()
             choice = self.get_user_choice()
             if self.check_answer(choice):
