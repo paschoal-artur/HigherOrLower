@@ -1,7 +1,7 @@
 import random
-from dependencies.art import display_vs, lose 
+from dependencies.art import display_vs
 from dependencies.game_data import load_game_data
-from dependencies.player_name import load_player_name, save_player_name
+from dependencies.player_functionalities import load_player_name, save_player_name, load_player_score, save_player_score
 from dependencies.high_score import HighScoreManager
 
 class Player:
@@ -21,7 +21,7 @@ class Player:
         self.lost = False
 
 class Game:
-    def __init__(self,data_file, high_score_file, player_name_file):
+    def __init__(self,data_file, high_score_file, player_name_file, player_scores):
         self.df = load_game_data(data_file)
         self.player = Player()
         self.row = None
@@ -29,6 +29,7 @@ class Game:
         self.high_score_manager = HighScoreManager(high_score_file)
         self.high_score = self.high_score_manager.load_high_score()
         self.player_name_file = player_name_file
+        self.player_score_file = player_scores
         self.load_player_name()
 
     def load_player_name(self):
@@ -51,6 +52,8 @@ class Game:
                 if 1 <= choice <= len(all_names):
                     self.player.name = all_names[choice - 1]
                     print(f"\nWelcome back, {self.player.name}!")
+                    self.player.score = load_player_score(self.player_score_file, self.player.name)
+                    print(f"Your previous score: {self.player.score}")
                 elif choice == len(all_names) + 1:
                     self.create_new_player()
                 else:
@@ -75,6 +78,9 @@ class Game:
                 print("Name already exists. Please choose another name.")
                 self.create_new_player()
 
+    def save_game_state(self):
+        save_player_score(self.player_score_file, self.player.name, self.player.score)
+
     def get_random_row(self, exclude = None):
         row = random.choice(self.df.index)
         while row == exclude:
@@ -84,7 +90,6 @@ class Game:
     def display_choices(self):
         print(f"{self.df['name'][self.row]} has {self.df['value'][self.row]} average monthly searches")
         display_vs()
-        #print(f"{self.df['name'][self.row2]}")
 
     def get_user_choice(self):
         choice = input(f"{self.df['name'][self.row2]} has Higher or Lower searches than {self.df['name'][self.row]} ?\n").lower()
@@ -105,7 +110,6 @@ class Game:
         self.row2 = self.get_random_row(self.row)
     
     def play(self):
-        print(f"Welcome, {self.player.name}!")
         print(f"High Score: {self.high_score}\n")
         self.row = self.get_random_row()
         self.row2 = self.get_random_row(exclude=self.row)
@@ -118,12 +122,13 @@ class Game:
                 print(f"Correct! Current score: {self.player.score}")
                 self.update_game_state()
             else:
-                print(f"Wrong! Final score: {self.player.score}")
+                print(f"\nWrong! Final score: {self.player.score}")
                 self.player.lose()
 
         if self.player.score > self.high_score:
             self.high_score = self.player.score
             print(f"New High Score: {self.high_score}")
             self.high_score_manager.save_high_score(self.high_score)
-        print("Game Over!")
+        
+        self.save_game_state()
 

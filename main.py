@@ -3,11 +3,12 @@ from src.game import Game
 
 def main():
     display_logo()
-    # Pass all three required arguments to the Game class
+    # passing the three required class arguments
     game = Game(
         data_file='data/game_data.csv',
         high_score_file='dependencies/high_scores.txt',
-        player_name_file='dependencies/player_name.txt'
+        player_name_file='dependencies/player_name.txt',
+        player_scores_file='dependencies/player_scores.txt'
     )
     game.play()
 
