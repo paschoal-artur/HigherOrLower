@@ -1,7 +1,7 @@
 import random
 from dependencies.art import display_vs
 from dependencies.game_data import load_game_data
-from dependencies.player_functionalities import load_player_name, save_player_name, load_player_score, save_player_score
+from dependencies.player_functionalities import *  
 from dependencies.high_score import HighScoreManager
 
 class Player:
@@ -42,6 +42,7 @@ class Game:
             for idx, name in enumerate(all_names, start=1):
                 print(f"{idx}. {name}")
             print(f"{len(all_names) + 1}. Create a new name")
+            print(f"{len(all_names) + 2}. Remove a player")  # New option for removing a player
 
             # Prompt the user for their choice
             choice = input("\nEnter the number of your choice: ").strip()
@@ -56,6 +57,8 @@ class Game:
                     print(f"Your previous score: {self.player.score}")
                 elif choice == len(all_names) + 1:
                     self.create_new_player()
+                elif choice == len(all_names) + 2:
+                    self.remove_player_menu()  # Call the method to remove a player
                 else:
                     print("Invalid choice. Please try again.")
                     self.load_player_name()  # Retry if input is invalid
@@ -67,6 +70,43 @@ class Game:
             print("\nNo players found. Let's create a new player!")
             self.create_new_player()
     
+    def remove_player_menu(self):
+        all_names = load_player_name(self.player_name_file)
+
+        if all_names:
+            print("\nSelect a player to remove:")
+            for idx, name in enumerate(all_names, start=1):
+                print(f"{idx}. {name}")
+            print(f"{len(all_names) + 1}. Cancel")
+
+            choice = input("\nEnter the number of the player to remove: ").strip()
+
+            if choice.isdigit():
+                choice = int(choice)
+                if 1 <= choice <= len(all_names):
+                    player_to_remove = all_names[choice - 1]
+                    confirm = input(f"Are you sure you want to remove {player_to_remove}? (yes/no): ").strip().lower()
+                    if confirm == "yes":
+                        remove_name_success = remove_player_name(self.player_name_file, player_to_remove)
+                        remove_score_success = remove_player_score(self.player_score_file, player_to_remove)
+                        if remove_name_success and remove_score_success:
+                            print(f"Player {player_to_remove} removed successfully.")
+                        else:
+                            print(f"Error: Unable to remove player {player_to_remove}.")
+                    else:
+                        print("Player removal canceled.")
+                elif choice == len(all_names) + 1:
+                    print("Returning to main menu.")
+                else:
+                    print("Invalid choice. Please try again.")
+                    self.remove_player_menu()
+            else:
+                print("Invalid input. Please enter a number.")
+                self.remove_player_menu()
+        else:
+            print("No players available to remove.")
+
+
     def create_new_player(self):
         new_name = input("Enter your name: ").strip()
         if new_name:
@@ -77,6 +117,23 @@ class Game:
             else:
                 print("Name already exists. Please choose another name.")
                 self.create_new_player()
+
+    def remove_player(self):
+        if self.player.name:
+            remove_name_success = remove_player_name(self.player_name_file, self.player.name)
+            remove_score_success = remove_player_score(self.player_score_file, self.player.name)
+            
+            if remove_name_success and remove_score_success:
+                print(f"Player {self.player.name} removed successfully.")
+                # Reset the player object
+                self.player.name = ""
+                self.player.reset_score()
+                # Optionally reload players or prompt for a new player
+                self.load_player_name()
+            else:
+                print(f"Error: Unable to remove player {self.player.name}.")
+        else:
+            print("No player to remove.")
 
     def save_game_state(self):
         save_player_score(self.player_score_file, self.player.name, self.player.score)
