@@ -19,7 +19,7 @@ class Player:
     def reset_score(self):
         self.score = 0
         self.lost = False
-
+#####
 class Game:
     def __init__(self,data_file, high_score_file, player_name_file, player_scores):
         self.df = load_game_data(data_file)
