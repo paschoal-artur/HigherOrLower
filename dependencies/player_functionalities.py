@@ -17,12 +17,12 @@ def save_player_name(file_path, name):
 def load_player_score(file_path, player_name):
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
-            # Search for the player's score in the file
-            for line in file.readlines():
-                name, score = line.strip().split(',')
+            for line in file:
+                name, high, prev = line.strip().split(',')
                 if name == player_name:
-                    return int(score)
-    return 0  # Return 0 if the player does not have a score saved yet
+                    return int(high), int(prev)  # Return both scores
+    return 0, 0  # Default scores if player not found
+
 
 def remove_player_name(file_path, player_name):
     names = load_player_name(file_path)
@@ -58,17 +58,23 @@ def remove_player_score(file_path, player_name):
         print(f"Score file {file_path} does not exist.")
         return False 
 
-def save_player_score(file_path, player_name, score):
+def save_player_score(file_path, player_name, current_score, high_score):
     scores = {}
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
-            # Load all existing scores
-            for line in file.readlines():
-                name, score_value = line.strip().split(',')
-                scores[name] = int(score_value)
-    
-    scores[player_name] = score
+            for line in file:
+                name, high, prev = line.strip().split(',')
+                scores[name] = {"high_score": int(high), "previous_score": int(prev)}
 
+    # Update or create the player's score entry
+    if player_name in scores:
+        scores[player_name]["high_score"] = max(high_score, scores[player_name]["high_score"])
+        scores[player_name]["previous_score"] = current_score
+    else:
+        scores[player_name] = {"high_score": high_score, "previous_score": current_score}
+
+    # Write updated scores back to the file
     with open(file_path, 'w') as file:
-        for name, score_value in scores.items():
-            file.write(f"{name},{score_value}\n")
+        for name, score_data in scores.items():
+            file.write(f"{name},{score_data['high_score']},{score_data['previous_score']}\n")
+
