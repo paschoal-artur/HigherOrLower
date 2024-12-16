@@ -56,7 +56,7 @@ class Game:
                     self.play()
             elif choice == 5:
                 print("Thanks for playing, goodbye!")
-                break
+                exit()
             else:
                 print("Invalid choice. Please try again.")
 
@@ -67,7 +67,7 @@ class Game:
             print("\nChoose your player name:")
             for idx, name in enumerate(self.all_player_names, start=1):
                 print(f"{idx}. {name}")
-            print(f"{len(self.all_player_names) + 1}. Cancel")
+            print(f"{len(self.all_player_names) + 1}. Return to main menu")
 
             choice = input("\nEnter the number of your choice: ").strip()
 
@@ -77,14 +77,12 @@ class Game:
                     self.player.name = self.all_player_names[choice - 1]
                     high_score, previous_score = load_player_score(self.player_score_file, self.player.name)
                     print(f"\nWelcome back, {self.player.name}!")
-                    print(f"Your high score: {high_score}")
-                    print(f"Your previous score: {previous_score}")
                     self.player.reset_score()  # Reset the score for the new game
 
                     self.player_menu()
 
                 elif choice == len(self.all_player_names) + 1:
-                    print("Returning to main menu.")
+                    print("Returning to main menu. . . .")
                 else:
                     print("Invalid choice. Please try again.")
                     self.choose_player()  # Retry if input is invalid
@@ -225,6 +223,9 @@ class Game:
             return self.df['value'][self.row2] > self.df['value'][self.row]
         elif choice == 'l':
             return self.df['value'][self.row] > self.df['value'][self.row2]
+        elif choice == 'h' or choice == 'l':
+            if self.df['value'][self.row] == self.df['value'][self.row2]:
+                return True
         return False 
 
     def update_game_state(self):
@@ -232,7 +233,6 @@ class Game:
         self.row2 = self.get_random_row(self.row)
     
     def play(self):
-        print(f"High Score: {self.high_score}\n")
         self.row = self.get_random_row()
         self.row2 = self.get_random_row(exclude=self.row)
 
@@ -245,7 +245,9 @@ class Game:
                 self.update_game_state()
             else:
                 print(f"\nWrong! Final score: {self.player.score}")
-                self.player.lose()
+                self.player.reset_score()
+                self.player.lost = False
+                self.player_menu()
 
         save_player_score(
             self.player_score_file,
@@ -256,4 +258,3 @@ class Game:
 
         # Update the high score in memory
         self.high_score = max(self.high_score, self.player.score)
-

@@ -10,6 +10,7 @@ def main():
         player_name_file='dependencies/player_name.txt',
         player_scores ='dependencies/player_scores.txt'
     )
+    print(f"Welcome to the game!\nGame High Score: {game.high_score}")
     game.main_menu()
 
 if __name__ == "__main__":
