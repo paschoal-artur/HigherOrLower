@@ -6,9 +6,7 @@ def main():
     # passing the four required class arguments
     game = Game(
         data_file='data/game_data_with_formatting.csv',
-        high_scores='dependencies/high_scores.txt',
-        player_name_file='dependencies/player_name.txt',
-        player_scores ='dependencies/player_scores.txt'
+        player_data_file = 'dependencies/player_data.txt',
     )
     print(f"Welcome to the game!\nGame High Score: {game.high_score}")
     game.main_menu()

@@ -1,36 +1,29 @@
 import os 
 
-def load_player_name(file_path):
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as file:
-            return [name.strip() for name in file.readlines() if name.strip()]
-    return []
-
-def save_player_name(file_path, name):
-    names = load_player_name(file_path)
-    if name in names:
-        return False
-    with open(file_path, 'a') as file:
-        file.write(f'{name}\n')
-    return True 
-
-def load_player_score(file_path, player_name):
+def load_players(file_path):
+    players = {}
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
             for line in file:
                 name, high, prev = line.strip().split(',')
-                if name == player_name:
-                    return int(high), int(prev)  # Return both scores
-    return 0, 0  # Default scores if player not found
+                players[name] = {"high_score": int(high), "previous_score": int(prev)}
+    return players
 
+def save_new_player(file_path, name):
+    players = load_players(file_path)
+    if name in players:
+        return False
+    with open(file_path, 'a') as file:
+        file.write(f'{name},0,0\n')
+    return True 
 
-def remove_player_name(file_path, player_name):
-    names = load_player_name(file_path)
-    if player_name in names:
-        names.remove(player_name)
+def remove_player(file_path, player_name):
+    players = load_players(file_path)
+    if player_name in players:
+        del players[player_name]
         with open(file_path, 'w') as file:
-            for name in names:
-                file.write(f'{name}\n')
+            for name, scores in players.items():
+                file.write(f"{name},{scores['high_score']},{scores['previous_score']}\n")
         return True
     return False
 
@@ -58,23 +51,16 @@ def remove_player_score(file_path, player_name):
         print(f"Score file {file_path} does not exist.")
         return False 
 
-def save_player_score(file_path, player_name, current_score, high_score):
-    scores = {}
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as file:
-            for line in file:
-                name, high, prev = line.strip().split(',')
-                scores[name] = {"high_score": int(high), "previous_score": int(prev)}
+def update_player_score(file_path, player_name, current_score, high_score):
+    players = load_players(file_path)
+    players[player_name] = {
+        "high_score": max(high_score, players.get(player_name, {}).get("high_score", 0)),
+        "previous_score": current_score,
+    }
 
-    # Update or create the player's score entry
-    if player_name in scores:
-        scores[player_name]["high_score"] = max(high_score, scores[player_name]["high_score"])
-        scores[player_name]["previous_score"] = current_score
-    else:
-        scores[player_name] = {"high_score": high_score, "previous_score": current_score}
-
-    # Write updated scores back to the file
+    # Salva todos os jogadores novamente
     with open(file_path, 'w') as file:
-        for name, score_data in scores.items():
-            file.write(f"{name},{score_data['high_score']},{score_data['previous_score']}\n")
+        for name, scores in players.items():
+            file.write(f"{name},{scores['high_score']},{scores['previous_score']}\n")
+
 

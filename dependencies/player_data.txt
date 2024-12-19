@@ -1,0 +1,3 @@
+Artur,1,1
+Jessica,0,0
+Random,1,0

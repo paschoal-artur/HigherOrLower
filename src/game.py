@@ -1,9 +1,7 @@
 import random
 from dependencies.art import display_vs
 from dependencies.game_data import load_game_data
-from dependencies.player_functionalities import *  
-from dependencies.high_score import HighScoreManager
-
+from dependencies.player_functionalities import load_players, save_new_player, remove_player, remove_player_score, update_player_score
 class Player:
     def __init__(self, name=""):
         self.name = name
@@ -21,16 +19,18 @@ class Player:
         self.lost = False
 
 class Game:
-    def __init__(self,data_file, high_scores, player_name_file, player_scores):
+    def __init__(self,data_file: str, player_data_file: str) -> None:
         self.df = load_game_data(data_file)
         self.player = Player()
         self.row = None
         self.row2 = None 
-        self.high_score_manager = HighScoreManager(high_scores)
-        self.high_score = self.high_score_manager.load_high_score()
-        self.player_name_file = player_name_file
-        self.player_score_file = player_scores
-        self.all_player_names = load_player_name(self.player_name_file)
+        self.player_data_file = player_data_file
+        self.players = load_players(self.player_data_file)
+        self.high_score = self.get_game_high_score()
+
+
+    def get_game_high_score(self):
+        return max((data["high_score"] for data in self.players.values()), default=0)
 
     def main_menu(self):
         while True:
@@ -51,37 +51,33 @@ class Game:
             elif choice == 4:
                 if not self.player.name:
                     print("Please choose a player first.")
-                    load_player_name(self.player_name_file)
                 else:
                     self.play()
             elif choice == 5:
                 print("Thanks for playing, goodbye!")
-                exit()
+                exit() 
             else:
                 print("Invalid choice. Please try again.")
 
 
     def choose_player(self):
-        self.all_player_names = load_player_name(self.player_name_file)
-        if self.all_player_names:
+        if self.players:
             print("\nChoose your player name:")
-            for idx, name in enumerate(self.all_player_names, start=1):
+            for idx, name in enumerate(self.players.keys(), start=1):
                 print(f"{idx}. {name}")
-            print(f"{len(self.all_player_names) + 1}. Return to main menu")
+            print(f"{len(self.players) + 1}. Return to main menu")
 
             choice = input("\nEnter the number of your choice: ").strip()
 
             if choice.isdigit():
                 choice = int(choice)
-                if 1 <= choice <= len(self.all_player_names):
-                    self.player.name = self.all_player_names[choice - 1]
-                    high_score, previous_score = load_player_score(self.player_score_file, self.player.name)
+                if 1 <= choice <= len(self.players):
+                    self.player.name = list(self.players.keys())[choice - 1]
                     print(f"\nWelcome back, {self.player.name}!")
                     self.player.reset_score()  # Reset the score for the new game
-
                     self.player_menu()
 
-                elif choice == len(self.all_player_names) + 1:
+                elif choice == len(self.players) + 1:
                     print("Returning to main menu. . . .")
                 else:
                     print("Invalid choice. Please try again.")
@@ -93,60 +89,51 @@ class Game:
             print("\nNo players found. Let's create a new player!")
             self.create_new_player()
 
-    def load_player_name(file_path):
-        if os.path.exists(file_path):
-            with open(file_path, 'r') as file:
-                return [name.strip() for name in file.readlines() if name.strip()]
-        return []
-    
-    def remove_player_menu(self):
-        # Load the player names correctly by passing the file path
-        all_names = load_player_name(self.player_name_file)
+    def create_new_player(self):
+        new_name = input("Enter your name: ").strip()
+        if new_name:
+            if save_new_player(self.player_data_file, new_name):
+                print(f"Player {new_name} added successfully!")
+                self.players = load_players(self.player_data_file)
+            else:
+                print("Name already exists. Please choose another one.")
 
-        if all_names:
+    def remove_player_menu(self):
+        if self.players:
             print("\nSelect a player to remove:")
-            for idx, name in enumerate(all_names, start=1):
+            for idx, name in enumerate(self.players.keys(), start=1):
                 print(f"{idx}. {name}")
-            print(f"{len(all_names) + 1}. Cancel")
+            print(f"{len(self.players) + 1}. Cancel")
 
             choice = input("\nEnter the number of the player to remove: ").strip()
-
             if choice.isdigit():
                 choice = int(choice)
-                if 1 <= choice <= len(all_names):
-                    player_to_remove = all_names[choice - 1]
+                if 1 <= choice <= len(self.players):
+                    player_to_remove = list(self.players.keys())[choice - 1]
                     confirm = input(f"Are you sure you want to remove {player_to_remove}? (Y/N): ").strip().lower()
                     if confirm == "y":
-                        remove_name_success = remove_player_name(self.player_name_file, player_to_remove)
-                        remove_score_success = remove_player_score(self.player_score_file, player_to_remove)
-                        if remove_name_success and remove_score_success:
+                        if remove_player(self.player_data_file, player_to_remove):
                             print(f"Player '{player_to_remove}' removed successfully.")
-                            # Refresh the player list
-                            self.all_player_names = load_player_name(self.player_name_file)
-                        elif remove_name_success and not remove_score_success:
-                            print(f"Player '{player_to_remove}' removed from names but not found in scores.")
-                            self.all_player_names = load_player_name(self.player_name_file)  # Refresh list
+                            self.players = load_players(self.player_data_file)  # Atualiza a lista
                         else:
                             print(f"Error: Unable to remove player '{player_to_remove}'.")
                     else:
                         print("Player removal canceled.")
-                elif choice == len(all_names) + 1:
+                elif choice == len(self.players) + 1:
                     print("Returning to main menu.")
                 else:
                     print("Invalid choice. Please try again.")
-                    self.remove_player_menu()  # Retry if input is invalid
             else:
                 print("Invalid input. Please enter a number.")
-                self.remove_player_menu()  # Retry if input is invalid
         else:
             print("No players available to remove.")
-        
-        # Always return to the main menu after execution
-        self.main_menu()
+
 
     def player_menu(self):
-        high_score, previous_score = load_player_score(self.player_score_file, self.player.name)
         while True:
+            high_score = self.players[self.player.name]["high_score"]
+            previous_score = self.players[self.player.name]["previous_score"]
+
             print(f"\n--- {self.player.name}'s Menu ---")
             print(f"High Score: {high_score}")
             print(f"Previous Score: {previous_score}")
@@ -168,30 +155,15 @@ class Game:
             else:
                 print("Invalid choice. Please try again.")
 
-    def create_new_player(self):
-        new_name = input("Enter your name: ").strip()
-        if new_name:
-            save_success = save_player_name(self.player_name_file, new_name)
-            if save_success:
-                print(f"\nPlayer '{new_name} added successfully!!")
-                self.all_player_names = load_player_name(self.player_name_file)
-                self.player.name = new_name
-            else:
-                print("Name already exists. Please choose another name.")
-                self.create_new_player()
-
     def remove_player(self):
         if self.player.name:
-            remove_name_success = remove_player_name(self.player_name_file, self.player.name)
-            remove_score_success = remove_player_score(self.player_score_file, self.player.name)
-            
-            if remove_name_success and remove_score_success:
+            if remove_player(self.player_data_file, self.player.name):
                 print(f"Player {self.player.name} removed successfully.")
                 # Reset the player object
                 self.player.name = ""
                 self.player.reset_score()
                 # Optionally reload players or prompt for a new player
-                self.all_player_names = load_player_name(self.player_name_file)
+                self.players = load_players(self.player_data_file)
             else:
                 print(f"Error: Unable to remove player {self.player.name}.")
         else:
@@ -199,13 +171,25 @@ class Game:
         self.main_menu()
 
     def save_game_state(self):
-        save_player_score(self.player_score_file, self.player.name, self.player.score)
+        update_player_score(
+            self.player_data_file,
+            self.player.name,
+            self.player.score,  # Current score
+            self.high_score  # Update high score if applicable
+        )
+        self.players = load_players(self.player_data_file)
 
     def get_random_row(self, exclude = None):
-        row = random.choice(self.df.index)
-        while row == exclude:
-            row = random.choice(self.df.index)
-        return row 
+        if not hasattr(self, 'used_rows'):
+            self.used_rows = set()
+
+        available_rows = [row for row in self.df.index if row not in self.used_rows and row != exclude]
+        if not available_rows:
+            raise ValueError("No more rows available")
+        
+        chosen_row = random.choice(available_rows)
+        self.used_rows.add(chosen_row)
+        return chosen_row
 
     def display_choices(self):
         print(f"{self.df['name'][self.row]} has {self.df['formatted_value'][self.row]} average monthly searches")
@@ -219,42 +203,40 @@ class Game:
         return choice
 
     def check_answer(self, choice):
+        if self.df['value'][self.row] == self.df['value'][self.row2]:
+            return True 
         if choice == 'h':
             return self.df['value'][self.row2] > self.df['value'][self.row]
         elif choice == 'l':
-            return self.df['value'][self.row] > self.df['value'][self.row2]
-        elif choice == 'h' or choice == 'l':
-            if self.df['value'][self.row] == self.df['value'][self.row2]:
-                return True
-        return False 
+            return self.df['value'][self.row2] < self.df['value'][self.row]
 
     def update_game_state(self):
         self.row = self.row2
         self.row2 = self.get_random_row(self.row)
     
     def play(self):
+        self.used_rows = set()
+
         self.row = self.get_random_row()
         self.row2 = self.get_random_row(exclude=self.row)
 
         while not self.player.lost:
             self.display_choices()
             choice = self.get_user_choice()
+
             if self.check_answer(choice):
                 self.player.increment_score()
                 print(f"Correct! Current score: {self.player.score}")
+
+                if self.player.score > self.high_score:
+                    self.high_score = self.player.score
+                    print(f"New game high score: {self.high_score}")
+
                 self.update_game_state()
             else:
                 print(f"\nWrong! Final score: {self.player.score}")
+                self.save_game_state()
                 self.player.reset_score()
-                self.player.lost = False
-                self.player_menu()
-
-        save_player_score(
-            self.player_score_file,
-            self.player.name,
-            self.player.score,  # Current score (previous score)
-            max(self.high_score, self.player.score)  # Update high score if applicable
-        )
-
-        # Update the high score in memory
-        self.high_score = max(self.high_score, self.player.score)
+                self.player.lose()
+                break 
+        self.player_menu()
