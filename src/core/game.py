@@ -1,63 +1,47 @@
 import random
-from dependencies.art import display_vs
-from dependencies.game_data import load_game_data
-from dependencies.player_functionalities import load_players, save_new_player, remove_player, remove_player_score, update_player_score
-class Player:
-    def __init__(self, name=""):
-        self.name = name
-        self.score = 0
-        self.lost = False  
-    
-    def increment_score(self):
-        self.score += 1
-    
-    def lose(self):
-        self.lost = True 
-    
-    def reset_score(self):
-        self.score = 0
-        self.lost = False
+from typing import Dict, Optional, Set
+from src.utils import display_vs, load_game_data, load_players, remove_player, save_new_player, update_player_score
+from .player import Player
+import pandas as pd
 
 class Game:
     def __init__(self,data_file: str, player_data_file: str) -> None:
-        self.df = load_game_data(data_file)
-        self.player = Player()
-        self.row = None
-        self.row2 = None 
-        self.player_data_file = player_data_file
-        self.players = load_players(self.player_data_file)
-        self.high_score = self.get_game_high_score()
-
+        self.df: pd.DataFrame = load_game_data(data_file)
+        self.player: Player = Player()
+        self.row: Optional[int] = None
+        self.row2: Optional[int] = None 
+        self.player_data_file: str = player_data_file
+        self.players: Dict[str, Dict[str, int]] = load_players(self.player_data_file)
+        self.high_score: int = self.get_game_high_score()
+        self.used_rows: Set[int] = set()
 
     def get_game_high_score(self):
         return max((data["high_score"] for data in self.players.values()), default=0)
 
     def main_menu(self):
         while True:
-            print("\n--- Main Menu ---")
-            print("1. Choose a player")
-            print("2. Create a new player")
-            print("3. Remove a player")
-            print("4. Play the game")
-            print("5. Quit")
+            try:
+                print("\n--- Main Menu ---")
+                print(f"Game High Score: {self.high_score}")
+                print("1. Choose a player")
+                print("2. Create a new player")
+                print("3. Remove a player")
+                print("4. Quit")
 
-            choice = int(input("\nEnter the number of your choice: ").strip())
-            if choice == 1:
-                self.choose_player()
-            elif choice == 2:
-                self.create_new_player()
-            elif choice == 3:
-                self.remove_player_menu()
-            elif choice == 4:
-                if not self.player.name:
-                    print("Please choose a player first.")
+                choice = int(input("\nEnter the number of your choice: ").strip())
+                if choice == 1:
+                    self.choose_player()
+                elif choice == 2:
+                    self.create_new_player()
+                elif choice == 3:
+                    self.remove_player_menu()
+                elif choice == 4:
+                    print("Thanks for playing, goodbye!")
+                    exit()
                 else:
-                    self.play()
-            elif choice == 5:
-                print("Thanks for playing, goodbye!")
-                exit() 
-            else:
-                print("Invalid choice. Please try again.")
+                    print("Invalid choice. Please try again.")
+            except ValueError:
+                print("Invalid input. Please enter a number.")
 
 
     def choose_player(self):
@@ -185,7 +169,9 @@ class Game:
 
         available_rows = [row for row in self.df.index if row not in self.used_rows and row != exclude]
         if not available_rows:
-            raise ValueError("No more rows available")
+            print("No more rows available, you've completed the game!!")
+            self.used_rows.clear()
+            available_rows = self.df.index.tolist()
         
         chosen_row = random.choice(available_rows)
         self.used_rows.add(chosen_row)
@@ -203,12 +189,12 @@ class Game:
         return choice
 
     def check_answer(self, choice):
-        if self.df['value'][self.row] == self.df['value'][self.row2]:
-            return True 
-        if choice == 'h':
-            return self.df['value'][self.row2] > self.df['value'][self.row]
-        elif choice == 'l':
-            return self.df['value'][self.row2] < self.df['value'][self.row]
+        value1 = self.df['value'][self.row]
+        value2 = self.df['value'][self.row2]
+
+        if value1 == value2:
+            return True
+        return (choice == 'h' and value2 > value1) or (choice == 'l' and value2 < value1)
 
     def update_game_state(self):
         self.row = self.row2
@@ -230,6 +216,7 @@ class Game:
 
                 if self.player.score > self.high_score:
                     self.high_score = self.player.score
+                    self.save_game_state()
                     print(f"New game high score: {self.high_score}")
 
                 self.update_game_state()
