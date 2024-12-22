@@ -22,6 +22,15 @@ def save_new_player(file_path: str, name: str) -> bool:
         print(f"Error saving new player: {e}")
         return False 
 
+def get_player_rankings(file_path:str) -> list:
+    players = load_players(file_path)
+    rankings = sorted(
+        [(name, data["high_score"]) for name, data in players.items()],
+        key = lambda x: x[1],
+        reverse = True
+    )
+    return rankings
+
 def remove_player(file_path: str, player_name: str) -> bool:
     try:
         players = load_players(file_path)
