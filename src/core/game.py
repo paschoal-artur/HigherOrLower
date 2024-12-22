@@ -1,6 +1,8 @@
 import random
 from typing import Dict, Optional, Set
-from src.utils import display_vs, load_game_data, load_players, remove_player, save_new_player, update_player_score
+from src.utils.file_handler import load_players, remove_player, save_new_player, update_player_score, get_player_rankings
+from src.utils.game_data import load_game_data
+from src.utils.display import display_vs
 from .player import Player
 import pandas as pd
 
@@ -26,7 +28,8 @@ class Game:
                 print("1. Choose a player")
                 print("2. Create a new player")
                 print("3. Remove a player")
-                print("4. Quit")
+                print("4. Rankings")
+                print("5. Quit")
 
                 choice = int(input("\nEnter the number of your choice: ").strip())
                 if choice == 1:
@@ -36,6 +39,8 @@ class Game:
                 elif choice == 3:
                     self.remove_player_menu()
                 elif choice == 4:
+                    self.display_rankings()
+                elif choice == 5:
                     print("Thanks for playing, goodbye!")
                     exit()
                 else:
@@ -43,6 +48,15 @@ class Game:
             except ValueError:
                 print("Invalid input. Please enter a number.")
 
+    def display_rankings(self):
+        rankings = get_player_rankings(self.player_data_file)
+        print("\n--- Player Rankings ---")
+        if rankings:
+            for idx, (name, high_score) in enumerate(rankings, start=1):
+                print(f"{idx}. {name} - High Score: {high_score}")
+        else:
+            print("No players found.")
+        self.main_menu()
 
     def choose_player(self):
         if self.players:
