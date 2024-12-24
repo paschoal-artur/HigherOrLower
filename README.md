@@ -1,7 +1,7 @@
 # Higher or Lower Game
 
 ## Introduction
-The "Higher or Lower" game is an interactive, fun, and engaging project designed to challenge players to guess whether the next value in a sequence is higher or lower. This project is based on the original web game, Higher Or Lower, http://www.higherlowergame.com/
+The "Higher or Lower" game is an interactive, fun, and engaging project designed to challenge players to guess whether the next value in a sequence is higher or lower. This project is based on the original web game, Higher Or Lower (http://www.higherlowergame.com/).
 
 ## Features
 - **Dynamic Gameplay**: Players guess values based on real or simulated data.
