@@ -1,126 +1,84 @@
-# Higher or Lower Game 🎮
+# Higher or Lower Game
 
-Welcome to the **Higher or Lower** game! This interactive game challenges players to guess whether one item's search volume is higher or lower than another. A perfect game for fun and learning!
+## Introduction
+The "Higher or Lower" game is an interactive, fun, and engaging project designed to challenge players to guess whether the next value in a sequence is higher or lower. This project is based on the original web game, Higher Or Lower, http://www.higherlowergame.com/
 
-## 📖 Table of Contents
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [How to Contribute](#how-to-contribute)
-- [License](#license)
+## Features
+- **Dynamic Gameplay**: Players guess values based on real or simulated data.
+- **Player Data Management**: Tracks player scores and stores high scores.
+- **Reusable Code**: Modular design for easy maintenance and extension.
 
----
+## How It Works
+1. **Start the Game**:
+   - Displays a welcome screen.
+   - Shows the main menu where players can start, view scores, or exit.
 
-## 🌟 Features
-- **Player Profiles**: Create, manage, and save individual player profiles.
-- **Score Tracking**: Tracks high scores and last game scores for each player.
-- **Real-time Updates**: Player data is saved and updated in real time.
-- **No Repetition**: Ensures that previously shown items do not repeat during a session.
-- **Interactive CLI**: User-friendly command-line interface.
-- **Data-Driven**: Loads game items and player data from external files (CSV and TXT).
+2. **Game Mechanics**:
+   - Randomly selects data points for players to compare.
+   - Players decide if the next value is higher or lower.
+   - Tracks the player's progress and updates scores dynamically.
 
----
+3. **Data Management**:
+   - Uses `.csv` files to store game data.
+   - Keeps track of player data in `.txt` files.
 
-## 🛠 Installation
+## Technologies Used
+- **Python**: Core programming language.
+- **Pandas**: For data manipulation.
+- **Object-Oriented Design**: Encapsulation of game logic in classes.
 
-### Prerequisites
-- Python 3.8+
-- A terminal or command prompt to run the game.
+## The data
+- The values and comparisions are using the real Higher or Lower game data. In this repository (https://github.com/julius2503/higher-lower-game) Julius built an automatized python bot that plays the game and collects the data. I ran the bot and collected the data that is being used in my project, so everything is up to date in the game.
 
-### Clone the Repository
-```bash
-git clone https://github.com/your-username/HigherOrLower.git
-cd HigherOrLower
-```
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/paschoal-artur/HigherOrLower.git
+   ```
 
-### Install Dependencies
-This project uses **pytest** for testing. Install it using:
-```bash
-pip install pytest
-```
+2. Navigate to the project directory:
+   ```bash
+   cd HigherOrLower
+   ```
 
----
+3. Install required dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## 🚀 Usage
+4. Run the game:
+   ```bash
+   python main.py
+   ```
 
-### Run the Game
-To start the game, navigate to the `src` folder and run:
-```bash
-python main.py
-```
-
-### Play the Game
-1. Choose a player or create a new one.
-2. Start the game, and guess if the second item has higher or lower searches.
-3. Your score and progress will be saved automatically.
-
-### Run Tests
-To ensure everything is working properly, run:
-```bash
-pytest tests/
-```
-
----
-
-## 📂 Project Structure
+## File Structure
 ```
 HigherOrLower/
-├── data/
-│   ├── game_data_with_formatting.csv   # Game items with search data
-│   └── player_data.txt                 # Player profiles and scores
-├── src/
-│   ├── core/                           # Core game logic
-│   │   ├── game.py                     # Main game logic
-│   │   └── player.py                   # Player management
-│   ├── utils/                          # Utility functions
-│   │   ├── file_handler.py             # File operations
-│   │   ├── game_data.py                # Game data operations
-│   │   └── display.py                  # Display utilities
-│   └── main.py                         # Entry point for the game
-├── tests/                              # Unit tests
-│   ├── core/                           # Tests for core logic
-│   └── utils/                          # Tests for utility functions
-└── README.md                           # Documentation
+|— data/
+|   |— game_data_with_formatting.csv  # Game data file
+|   |— player_data.txt                # Player data file
+|— src/
+|   |— core/                         # Core game logic
+|   |   |— game.py
+|   |   |— player.py
+|   |— utils/                        # Utility functions
+|       |— display.py
+|       |— file_handler.py
+|       |— game_data.py
+|— main.py                          # Game entry point
+|— README.md                        # Project documentation
+|— requirements.txt                # Python dependencies
 ```
 
----
+## Contributing
+Contributions are welcome! If you'd like to improve the game, please:
+1. Fork the repository.
+2. Create a new branch for your feature.
+3. Submit a pull request with a clear description of your changes.
 
-## 🤝 How to Contribute
+## License
+This project is licensed under the MIT License. See `LICENSE` for more details.
 
-We welcome contributions! Follow these steps:
-1. **Fork the repository**: Click on the fork button at the top right of this page.
-2. **Clone your fork**:
-   ```bash
-   git clone https://github.com/your-username/HigherOrLower.git
-   ```
-3. **Create a feature branch**:
-   ```bash
-   git checkout -b feature/new-feature
-   ```
-4. **Commit your changes**:
-   ```bash
-   git commit -m "Add a new feature"
-   ```
-5. **Push to your fork**:
-   ```bash
-   git push origin feature/new-feature
-   ```
-6. **Create a pull request**: Go to the original repository and click on "New Pull Request".
-
----
-
-## 📜 License
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-## 🛡️ Disclaimer
-This game is a fun project and uses fictitious data for demonstration purposes. It is not responsible for real-world accuracy of search volumes.
-
----
-
-## 💡 Acknowledgments
-- Inspired by the "Higher or Lower" concept.
-- Built with love using Python. 💻❤️
+## Connect
+If you enjoyed this project or have suggestions, feel free to reach out on [LinkedIn](https://www.linkedin.com/in/artur-paschoal-18295627b/). Let's connect and collaborate!
 
