@@ -3,7 +3,7 @@ from src.utils.display import display_logo
 
 def main():
     display_logo()
-    # passing the four required class arguments
+    # passing the two required class arguments
     game = Game(
         data_file='data/game_data_with_formatting.csv',
         player_data_file = 'data/player_data.txt',

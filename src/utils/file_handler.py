@@ -2,6 +2,8 @@ import os
 from typing import Dict
 
 def load_players(file_path: str) -> Dict[str, Dict[str, int]]:
+    """Method to load the players from a file"""
+
     players: Dict[str, Dict[str, int]] = {}
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
@@ -11,6 +13,8 @@ def load_players(file_path: str) -> Dict[str, Dict[str, int]]:
     return players
 
 def save_new_player(file_path: str, name: str) -> bool:
+    """Method to save a new player to the file"""
+
     try:
         players = load_players(file_path)
         if name in players:
@@ -23,6 +27,8 @@ def save_new_player(file_path: str, name: str) -> bool:
         return False 
 
 def remove_player(file_path: str, player_name: str) -> bool:
+    """Method to remove a player from the file"""
+
     try:
         players = load_players(file_path)
         if player_name in players:
@@ -36,6 +42,7 @@ def remove_player(file_path: str, player_name: str) -> bool:
         return False
 
 def update_player_score(file_path: str, player_name: str, current_score: int, high_score: int) -> None:
+    """Method to update a player's score in the file"""
     players = load_players(file_path)
     try:
         # Verificar se o jogador já existe

@@ -5,6 +5,9 @@ from .player import Player
 import pandas as pd
 
 class Game:
+    """Class that represents the game core logic and functionality, 
+    including game management, player management and data handling."""
+
     def __init__(self,data_file: str, player_data_file: str) -> None:
         self.df: pd.DataFrame = load_game_data(data_file)
         self.player: Player = Player()
@@ -16,9 +19,14 @@ class Game:
         self.used_rows: Set[int] = set()
 
     def get_game_high_score(self):
+        """Returns the highest score among all players."""
+
         return max((data["high_score"] for data in self.players.values()), default=0)
 
     def main_menu(self):
+        """Main menu of the game, where the player can choose to play, create a new player, 
+        remove a player or quit the game."""
+
         while True:
             try:
                 print("\n--- Main Menu ---")
@@ -45,6 +53,8 @@ class Game:
 
 
     def choose_player(self):
+        """Method to choose a player from the list of players or create a new player."""
+
         if self.players:
             print("\nChoose your player name:")
             for idx, name in enumerate(self.players.keys(), start=1):
@@ -74,6 +84,8 @@ class Game:
             self.create_new_player()
 
     def create_new_player(self):
+        """Method to create a new player and add it to the list of players."""
+
         new_name = input("Enter your name: ").strip()
         if new_name:
             if save_new_player(self.player_data_file, new_name):
@@ -83,6 +95,8 @@ class Game:
                 print("Name already exists. Please choose another one.")
 
     def remove_player_menu(self):
+        """Method to remove a player from the list of players."""
+
         if self.players:
             print("\nSelect a player to remove:")
             for idx, name in enumerate(self.players.keys(), start=1):
@@ -114,6 +128,8 @@ class Game:
 
 
     def player_menu(self):
+        """Menu for the player to play the game, return to the main menu or quit the game."""
+
         while True:
             high_score = self.players[self.player.name]["high_score"]
             previous_score = self.players[self.player.name]["previous_score"]
@@ -140,6 +156,8 @@ class Game:
                 print("Invalid choice. Please try again.")
 
     def remove_player(self):
+        """Method to remove the current player from the list of players."""
+
         if self.player.name:
             if remove_player(self.player_data_file, self.player.name):
                 print(f"Player {self.player.name} removed successfully.")
@@ -155,6 +173,8 @@ class Game:
         self.main_menu()
 
     def save_game_state(self):
+        """Method to save the current game state, including the player's score and high score."""
+
         update_player_score(
             self.player_data_file,
             self.player.name,
@@ -164,6 +184,8 @@ class Game:
         self.players = load_players(self.player_data_file)
 
     def get_random_row(self, exclude = None):
+        """Method to get a random row from the data file, excluding the row passed as an argument."""
+
         if not hasattr(self, 'used_rows'):
             self.used_rows = set()
 
@@ -178,10 +200,14 @@ class Game:
         return chosen_row
 
     def display_choices(self):
+        """Method to display the two choices to the player."""
+        
         print(f"{self.df['name'][self.row]} has {self.df['formatted_value'][self.row]} average monthly searches")
         display_vs()
 
     def get_user_choice(self):
+        """Method to get the user's choice of 'higher' or 'lower'."""
+
         choice = input(f"{self.df['name'][self.row2]} has Higher or Lower searches than {self.df['name'][self.row]} ?\n").lower()
         while choice not in ['h', 'l']:
             print("Invalid choice. Please type 'H' or 'L'")
@@ -189,6 +215,8 @@ class Game:
         return choice
 
     def check_answer(self, choice):
+        """Method to check if the user's choice is correct."""
+
         value1 = self.df['value'][self.row]
         value2 = self.df['value'][self.row2]
 
@@ -197,10 +225,12 @@ class Game:
         return (choice == 'h' and value2 > value1) or (choice == 'l' and value2 < value1)
 
     def update_game_state(self):
+        """Method to update the game state after the user's answer."""
         self.row = self.row2
         self.row2 = self.get_random_row(self.row)
     
     def play(self):
+        """Method to start the game and manage the game flow."""
         self.used_rows = set()
 
         self.row = self.get_random_row()
