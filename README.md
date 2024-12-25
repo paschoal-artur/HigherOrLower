@@ -38,7 +38,6 @@ The "Higher or Lower" game is an interactive, fun, and engaging project designed
 
 ## Technologies Used
 - **Python**: Core programming language for implementing the game logic.
-- **Pandas**: For efficient data loading and manipulation.
 - **Object-Oriented Design**: Encapsulation of game logic and player management in modular classes.
 
 ## The Data
